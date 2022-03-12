@@ -34,9 +34,17 @@ public final class Main {
     }
 
     private static <T> String listObjToJson(List<T> list) {
-        Type listType = new TypeToken<List<T>>() {
-        }.getType();
+        Type listType = new TypeToken<List<T>>() {}.getType();
         return new Gson().toJson(list, listType);
+    }
+
+    private static void writeJson(File file, String json) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(
+                        new FileOutputStream(file, false), StandardCharsets.UTF_8))) {
+            writer.write(json);
+            writer.flush();
+        }
     }
 
     public static void main(String[] args) {
@@ -47,14 +55,19 @@ public final class Main {
                 if (file.exists() && file.isFile() && file.getName().endsWith(".csv")) {
                     String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
                     List<Employee> employees = csvToListObj(file, ';', Employee.class, columnMapping);
-                    System.out.println(listObjToJson(employees));
-                } else {
-                    throw new FileNotFoundException();
-                }
+                    String json = listObjToJson(employees);
+                    File savePath = new File(file.getParentFile(), "data.json");
+                    try {
+                        writeJson(savePath, json);
+                        System.out.println("Результаты работы успешно записаны на диск " + savePath.getAbsolutePath());
+                    } catch (IOException e) {
+                        System.err.println("Произошла ошибка при попытке записи файла " + savePath.getAbsolutePath());
+                    }
+                } else throw new FileNotFoundException();
             } catch (FileNotFoundException e) {
-                System.err.println("Проверьте правильность указания пути и имени файла.");
+                System.err.println("Проверьте правильность указания пути и имени файла");
             } catch (IOException e) {
-                System.err.println("Произошла ошибка при попытке чтения указанного файла.");
+                System.err.println("Произошла ошибка при попытке чтения указанного файла");
             }
         }
     }
