@@ -5,8 +5,7 @@ public final class Employee {
     public String country;
     public int age;
 
-    public Employee() {
-    }
+    public Employee() {}
 
     public Employee(long id,
                     String firstName,
